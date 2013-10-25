@@ -1,0 +1,35 @@
+﻿.detail,.search-panel
+{
+    width:100%;
+    display:block;
+    height:25px;
+}
+.detail ul,.search-panel ul
+{
+    list-style-type: none;
+    padding:0px;
+    margin:5px;
+}
+
+.detail ul li,.search-panel ul li
+{
+  height: 25px;
+  float: left;
+  margin-right: 0px;
+  border-right: 1px solid #aaa;
+  padding: 0 5px;  
+}
+
+.detail .label,.search-panel .label
+{
+    width:80px;
+    text-align:left;
+    display:inline-block;
+    padding-right:5px;
+}
+
+.search-panel button
+{
+    float:right;
+    padding-right:5px;
+}
