@@ -15,7 +15,7 @@ app.controller('ctrl',
 ['$scope', 'Module', 'DataQueryFactory', function ($scope, Module, DataQueryFactory) {
     $scope.queries = {};
     $scope.conditions = [];
-
+     
     $scope.onItemClick = function (item) {
         //alert(item.key);
         var dataQuery = $scope.currentDataQuery;
@@ -63,25 +63,11 @@ app.controller('ctrl',
         if ($scope.queries.length > 0) {
             $scope.queries[0].init(function () {
                 $scope.currentDataQuery = $scope.queries[0]; //$scope.currentDataQuery.open();
+                //$scope.currentDataQuery.ReadOnly = true;
                 $scope.conditions = $scope.currentDataQuery.getConditionFields();
+              
             });
         }
     });
-
-    //    Module.getModuleQuery({ id: 22010070 }, function (data) {
-    //        $scope.queries = data;
-    //        angular.forEach(data, function (query, index) {
-    //            var item = DataQueryFactory.create($scope, query);
-    //            $scope.queries[query.Name] = item;
-    //            item.init();
-    //        });
-
-    //        if ($scope.queries.length > 0) {
-    //            $scope.currentDataQuery = $scope.queries[0]; //$scope.currentDataQuery.open();
-    //            $scope.conditions = $scope.currentDataQuery.getConditionFields();
-    //        }
-
-    //        //getConditionFields($scope.queries.dqDetail);
-    //    });
 
 } ]);
