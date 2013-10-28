@@ -9,6 +9,7 @@
             var grid = $('table', $element);
             var editIndex = undefined;
             this.onClickRow = function (index) {
+
                 if (!self.dataquery.Editable)
                     return;
                 if (editIndex != index) {
@@ -44,7 +45,7 @@
                     var options = {};
                     var dataquery = null;
                     var gridOptions = null;
-                    
+
                     if (attrs.dataquery) {
                         scope.$watch(attrs.dataquery, function (newl, oldl) {
                             if (newl == dataquery)
@@ -53,8 +54,12 @@
                             if (!newl)
                                 return;
                             dataquery.view = table;
-                            //dataquery.options = $.extend(dataquery.options, options);
-                            dataquery.open();
+                            dataquery.init(function () {
+                                table.datagrid(dataquery.options);
+                            });
+
+                            if (dataquery.AutoOpen)
+                                dataquery.open();
                         });
                     }
 
@@ -67,14 +72,14 @@
                             return;
                         var fn = $parse(value);
 
-                        var callback = angular.$wrapEventFunction(scope, table, value, fn);                        
+                        var callback = angular.$wrapEventFunction(scope, dataquery, value, fn);
 
                         scope.$on(action, callback);
                     });
-                    
+
                     scope.$on('onClickRow', function (event, args) {
-                        dataquery.focusRow = args[1];
                         dataquery.focusRowIndex = args[0];
+                        dataquery.focusRow = args[1];
                         scope.$digest();
                         scope.currentDataQuery = dataquery;
                         selectCtrl.onClickRow(args[0]);

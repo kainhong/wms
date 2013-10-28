@@ -144,6 +144,7 @@
     <Content Include="static\app\directives\yg.searchpanel.js" />
     <Content Include="static\app\directives\yg.component.js" />
     <Content Include="static\app\directives\yg.datagrid.js" />
+    <Content Include="static\app\services\yg.core.js" />
     <Content Include="static\app\services\yg.global.env.js" />
     <Content Include="static\app\services\yg.services.js" />
     <Content Include="static\css\main.css" />
@@ -450,6 +451,10 @@
     <Content Include="static\lib\yg.lsp.ext.js" />
     <Content Include="static\module\2201\22010070\controller.js" />
     <Content Include="static\module\2201\22010070\index.htm" />
+    <Content Include="static\module\2201\22010070\toolbar.htm" />
+    <Content Include="static\module\2205\22050010\controller.js" />
+    <Content Include="static\module\2205\22050010\index.htm" />
+    <Content Include="static\module\SubControllerDemo.htm" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

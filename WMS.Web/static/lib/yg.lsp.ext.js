@@ -1,4 +1,18 @@
-﻿angular.$wrapEventFunction = function (scope,element,name,fun) {
+﻿if (!Object.create) {
+    Object.create = (function () {
+        function F() { }
+
+        return function (o) {
+            if (arguments.length != 1) {
+                throw new Error('Object.create implementation only accepts one parameter.');
+            }
+            F.prototype = o;
+            return new F()
+        }
+    })()
+}
+
+angular.$wrapEventFunction = function (scope,element,name,fun) {
     var value = name;
     var arglist = value.substring(value.indexOf('(') + 1, value.indexOf(')')).split(',');
     for (var i = 0; i < arglist.length; i++) {
@@ -19,12 +33,31 @@
     //return arglist;
 }
 
+angular.$filterAry = function (ary, exp) {
+    if (!exp)
+        return ary;
+    var str = exp.replace(/(\w+)\s/g, function ($1) {
+        if ($1 == 'and ')
+            return '&& ';
+        else if ($1 == 'or ')
+            return '|| ';
+        else
+            return 'a.' + $1;
+    });
+
+    var content = "(function(a){ return " + str + ";})"
+    var fun = eval(content);
+    var items = [];
+    angular.forEach(ary, function (item, index) {
+        if (fun(item))
+            items.push(item);
+    });
+    return items;
+}
 
 //text,textarea,checkbox,numberbox,validatebox,datebox,combobox,combotree
 $.extend({
     getRenderer: function (field) {
-        //        if (field.ReadOnly)
-        //            return null;
         var map = {
             ButtonEdit: '',
             CheckBox: 'checkbox',
@@ -54,26 +87,14 @@ $.extend({
             var value = field.ValueMember.toUpperCase();
             renderer.options = {
                 valueField: value,
-                textField: name,
-                method: 'GET',
-                url: '/api/module/GetFieldDataSource/?' +
-                            'moduleid=' + field.moduleId +
-                            '&queryName=' + field.queryName +
-                            '&fieldName=' + field.FieldName
+                textField: name
             };
         }
 
         return renderer;
-        //        {
-        //                            type:'combobox',
-        //                            options:{
-        //                                valueField:'productid',
-        //                                textField:'productname',
-        //                                url:'products.json',
-        //                                required:true
-        //                            }
-        //                        }
+
         return;
     }
+  
 });
 

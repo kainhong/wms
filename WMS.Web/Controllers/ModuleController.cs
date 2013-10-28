@@ -67,17 +67,27 @@ namespace WMS.Web.Controllers
             var field = query.Fields[fieldName];
             if (field == null) 
                 return null;
+
             if (field.DispValueType == EnumDisplayValueType.dvtSQL)
             {
+                var script =  string.Join(Environment.NewLine,field.DisplayValue);
+                script = string.Format(@"SELECT * FROM 
+                    (
+                        SELECT A.*, ROWNUM RN 
+                        FROM ( {0} ) A 
+                            WHERE ROWNUM <= 20
+                    )
+                    WHERE RN >= 0", script);
+
                 using (var con = Unity.GetConnection())
                 {
                     var cmd = con.CreateCommand();
-                    cmd.CommandText = string.Join(Environment.NewLine,field.DisplayValue);
+                    cmd.CommandText = script;
                     cmd.Connection = con;
                     con.Open();
                     var rd = cmd.ExecuteReader();
                     var dt = new ListItem();
-                    dt.Load(rd);
+                    dt.Load(rd);                    
                     return dt;
                 }
             }

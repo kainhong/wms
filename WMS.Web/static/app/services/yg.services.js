@@ -54,21 +54,43 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
         var inited = false;
 
         /* private methods */
-        function wrapEvent(options) {
+        function wrapEvent(query) {
+            var options = query.options;
             var op = $.fn.datagrid.defaults;
             angular.forEach(op, function (value, name) {
                 var item = op[name];
                 if (name.indexOf('on') != 0)
                     return;
-
                 options[name] = function () {
-                    var args = arguments;
+                    var args = []; // arguments;
+                    for (var i in arguments)
+                        args.push(arguments[i]);
+                    args.dataquery = query;
                     scope.$broadcast(name, args);
                 };
-                //var name = item.toString();
-                //options[name] = item;
             });
         }
+
+        function getEditor(col) {
+            var editor = $.getRenderer(col.$field);
+            col.editor = editor;
+            var defaults = $.fn[editor.type].defaults;
+
+            if (defaults && defaults.hasOwnProperty('data')) {
+                col.formatter = function (value, row, index) {
+                    var val = null;
+                    if (editor.options.data) {
+                        angular.forEach(editor.options.data, function (item, index) {
+                            if (item[editor.options.valueField] == value)
+                                val = item[editor.options.textField];
+                        });
+                    }
+                    return val;
+                }
+            }
+            return editor;
+        }
+
         function initialFieldDataSource(cols) {
             var dataCols = [];
             var queries = [];
@@ -90,26 +112,32 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
 
             return $q.all(queries).then(function (datas) {
                 angular.forEach(datas, function (data, index) {
-                    dataCols[index].editor.data = data;
+                    dataCols[index].editor.options.data = data;
+                    dataCols[index].$field.datasource = data;
                 });
             });
         }
 
         /* publish methods */
         this.init = function (callback) {
-            if (inited)
+            if (inited) {
+                if (callback)
+                    callback();
                 return;
-
-            wrapEvent(this.options);
+            }
+            wrapEvent(this);
             var query = this;
             angular.forEach(this.Fields, function (field, index) {
                 field.moduleId = query.ModuleID;
                 field.queryName = query.Name;
             });
             var cols = this.getGridColumns();
-
             this.options = $.extend(this.options, { columns: cols });
             this.options.data = null;
+
+            //            scope.$on('onCellValueChanged', function (event, args) {
+
+            //            });
 
             var then = initialFieldDataSource(cols[0]);
 
@@ -163,8 +191,11 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
 
         }
 
+        var conditions;
         this.getConditionFields = function () {
-            var ary = [];
+            if (conditions)
+                return conditions;
+            var ary = conditions = [];
             angular.forEach(this.Fields, function (field, index) {
                 if (field.IsSearchCondition)
                     ary.push({
@@ -177,8 +208,10 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             });
             return ary;
         }
-
+        var columns;
         this.getGridColumns = function () {
+            if (columns)
+                return columns;
             var ary = [];
             var query = this;
             angular.forEach(this.Fields, function (field, index) {
@@ -189,28 +222,17 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                     field: field.FieldName,
                     title: field.Caption,
                     width: field.DisplayWidth,
-                    sortable: true,
-                    //editor: (query.ReadOnly || field.ReadOnly) ? null : $.getRenderer(field)// 'text'
-                    editor: $.getRenderer(field)// 'text'
+                    sortable: true
                 };
-                if (col.editor.type == 'combobox') {
-                    col.formatter = function (value, row, index) {
-                        var val = null;
-                        if (col.editor.data) {
-                            angular.forEach(col.editor.data, function (item, index) {
-                                if (item[field.ValueMember.toUpperCase()] == value)
-                                    val = item[field.DisplayMember.toUpperCase()];
-                            });
-                            return val;
-                        } else {
-                            return value;
-                        }
-                    }
-                }
+
+                if (!query.Editable || field.ReadOnly)
+                    col.editor = null;
+                else
+                    col.editor = getEditor(col)// 'text';
                 ary.push(col);
             });
-
-            return [ary];
+            columns = [ary]
+            return columns;
         };
 
         this.add = function () {
@@ -237,6 +259,10 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             data.modified = this.view.datagrid('getChanges', 'updated');
             data.added = this.view.datagrid('getChanges', 'inserted');
             data.deleted = this.view.datagrid('getChanges', 'deleted');
+            if (data.modified.length == 0 && data.added.length == 0 && data.deleted.length == 0) {
+                window.alert('没有需要保存的数据');
+                return;
+            }
             Module.saveData({ id: this.ModuleID, name: this.Name, data: data });
         }
     };

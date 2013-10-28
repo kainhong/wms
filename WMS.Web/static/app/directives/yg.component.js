@@ -112,7 +112,6 @@ uimodule.directive('ygTabs', function () {
 uimodule.directive('toolBar', ['$parse', function ($parse) {
     return {
         restrict: 'A',
-        scope: false,
         controller: function ($scope, $element) {
             var self = this;
             toolbar = $scope.toolbar = $.extend({}, $scope.toolbar);
@@ -132,7 +131,7 @@ uimodule.directive('toolBar', ['$parse', function ($parse) {
                 if (self.onItemClickFn) {
                     $scope.$apply(
                         function () {
-                            self.onItemClickFn($scope, { item: item }); 
+                            self.onItemClickFn($scope, { item: item });
                         }
                     );
                 }
@@ -151,82 +150,30 @@ uimodule.directive('toolBar', ['$parse', function ($parse) {
 .directive('barItem', function () {
     return {
         require: "^toolBar",
-        scope: { iconCls: '@', key: '@' },
         link: function (scope, element, attrs, tooBarCtrl) {
-            scope.disable = false;
-
+            var obj = {};
+            obj.text = $(element).text();
+            obj.key = attrs.key;
             $(element).linkbutton({
                 iconCls: attrs.iconCls
             });
-
-            scope.$watch("disable", function (newvalue, oldvalue) {
+            var disable = false;
+            scope.$watch(attrs.disable, function (newvalue, oldvalue) {
+                disable = newvalue;
                 if (newvalue)
                     $(element).linkbutton('disable');
                 else
                     $(element).linkbutton('enable');
             });
-            //$(element).$set("ngshow", scope.show);
 
-            scope.text = $(element).text();
-
-            $(element).on('click', function () {
-                tooBarCtrl.onBarItemClick(scope);
+            $(element).bind('click', function () {
+                if(!disable)
+                    tooBarCtrl.onBarItemClick(obj);
                 return false;
             });
-
-            tooBarCtrl.addBarItem(scope);
         }
     };
 })
-.directive('combobox2', function ($parse) {
-    return {
-        restrict: 'A',
-        require: ['combobox2', '?ngModel'],
-        controller: function ($scope, $element, Dictionary) {
-
-            this.bindData = function (opts, ctrl) {
-                Dictionary.list({ id: 1 }, function (data) {
-                    var op = $.extend({ data: data }, opts);
-                    $element.combobox(op);
-                    var viewValue = ctrl.$viewValue;
-                    $element.combobox('setValue', viewValue);
-                });
-            }
-        },
-        link: function (scope, element, attrs, ctrls) {
-            var selectCtrl = ctrls[0];
-            var ngModelCtrl = ctrls[1];
-
-            selectCtrl.bindData({
-                valueField: attrs.valueField,
-                textField: attrs.textField,
-                onSelect: onSelect
-            },
-                    ngModelCtrl
-            );
-
-            function onSelect(item) {
-                ///$parse(attrs.ngModel).assign(scope, element.val());
-                var value = item[attrs.valueField];
-                scope.$apply(function () {
-                    ngModelCtrl.$setViewValue(value);
-                });
-            }
-
-            ngModelCtrl.$render = function () {
-                //element.combobox('setValue', ngModelCtrl.$viewValue);
-            };
-
-            var lastView;
-            scope.$watch(function () {
-                if (lastView != ngModelCtrl.$viewValue) {
-                    lastView = ngModelCtrl.$viewValue;
-                    ngModelCtrl.$render();
-                }
-            });
-        }
-    };
-});
 
 
 

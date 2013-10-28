@@ -7,7 +7,12 @@ app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
 
         BaseController.call(this, $scope, Module, DataQueryFactory);
 
-        this.init('22010070');
+        this.init('22050010');
+
+        $scope.$on('onClickRow', function (event, args) {
+            var query = args.dataquery;
+            console.log(query);
+        });
     }
 
     Ctrl.prototype = Object.create(BaseController.prototype);
