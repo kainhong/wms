@@ -4,13 +4,17 @@
 app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
 
     function Ctrl($scope, Module, DataQueryFactory) {
+        $scope.BillNOFieldName = 'BillNO';
 
         BaseController.call(this, $scope, Module, DataQueryFactory);
 
         this.init('22050010');
 
-        $scope.$on('onClickRow', function (event, args) {
+        $scope.$on('onDblClickRow', function (event, args) {
             var query = args.dataquery;
+            if (query.Name != 'dqBillList')
+                return;
+            
             console.log(query);
         });
     }

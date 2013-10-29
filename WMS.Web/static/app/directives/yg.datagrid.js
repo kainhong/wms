@@ -56,10 +56,9 @@
                             dataquery.view = table;
                             dataquery.init(function () {
                                 table.datagrid(dataquery.options);
+                                if (dataquery.AutoOpen)
+                                    dataquery.load();
                             });
-
-                            if (dataquery.AutoOpen)
-                                dataquery.open();
                         });
                     }
 

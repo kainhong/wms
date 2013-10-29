@@ -57,7 +57,9 @@ namespace WMS.Web.Controllers
             }
             
         }
-                
+        
+
+        
         public ListItem GetFieldDataSource(int moduleId,string queryName,string fieldName)
         {
             DataQueryCollection lst = service.GetModuleQuery(moduleId);
@@ -93,9 +95,8 @@ namespace WMS.Web.Controllers
             }
             return null;
         }
-
-
-        public QueryResult PostQuerySearch(Query query)
+        
+        public QueryResult PostQuery(Query query)
         {
             DataQueryCollection lst = service.GetModuleQuery(query.ModuleId);
             var q = lst.FirstOrDefault(c => c.Name == query.DataQueryName);
@@ -135,7 +136,7 @@ namespace WMS.Web.Controllers
             }
             
         }
-
+        
         public ActionResult<bool> PostSaveData(int moduleid, string queryName,
             [ModelBinder(typeof(DataRecordModelBinder))]DataRecords datas)
         {

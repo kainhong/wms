@@ -86,25 +86,12 @@ app.factory(
 	            $scope.moduleId = moduleId;
 	            var query = Module.getModuleQuery({ id: moduleId }).$promise;
 	            var then = query.then(function (data) {
-	                $scope.queries = data;
-	                angular.forEach(data, function (query, index) {
-	                    var item = DataQueryFactory.create($scope, query);
-	                    $scope.queries[query.Name] = item;
-	                });
-
-	                if ($scope.queries.length > 0) {
-	                    if ($scope.queries.length == 1)
-	                        $scope.currentDataQuery = $scope.queries[0]
-	                    else if ($scope.queries.hasOwnProperty('dqBillList'))
-	                        $scope.currentDataQuery = $scope.queries.dqBillList;
-	                    else
-	                        $scope.currentDataQuery = $scope.queries.dqMaster;
-
-	                    if ($scope.currentDataQuery) {
-	                        $scope.currentDataQuery.init(function () {
-	                            $scope.conditions = $scope.currentDataQuery.getConditionFields();
-	                        });
-	                    }
+	                $scope.queries = DataQueryFactory.create($scope, data);
+                    if ($scope.currentDataQuery) {
+	                    $scope.currentDataQuery.visible = true;
+	                    $scope.currentDataQuery.init(function () {
+	                        $scope.conditions = $scope.currentDataQuery.getConditionFields();
+	                    });
 	                }
 	            });
 	        };
