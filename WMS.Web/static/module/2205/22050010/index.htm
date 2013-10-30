@@ -27,7 +27,7 @@
         </div>
         <div class='search-panel' ng-model='conditions' yg-search='search()'>
         </div>
-        <div gridview style="width: 100%;disply:inline-block;" ng-model='datasource' dataquery='currentDataQuery'
+        <div gridview style="width: 100%;disply:inline-block;" ng-model='datasource' dataquery='queries.dqBillList'
             on-click-cell="onClickCell(element,rowIndex,field,value)" on-click-row="onClickRow(element,rowIndex,rowData)"
             on-dbl-click-cell="onDblClickCell()">
             <table>

@@ -1,12 +1,12 @@
 ﻿//var app = angular.module('app', ['ui.component', 'yg.services', 'ui.envirment']);
 
 
-app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
+app.factory("app.Ctrl", function (BillController, Module, DataQueryFactory) {
 
     function Ctrl($scope, Module, DataQueryFactory) {
         $scope.BillNOFieldName = 'BillNO';
 
-        BaseController.call(this, $scope, Module, DataQueryFactory);
+        BillController.call(this, $scope, Module, DataQueryFactory);
 
         this.init('22050010');
 
@@ -19,7 +19,7 @@ app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
         });
     }
 
-    Ctrl.prototype = Object.create(BaseController.prototype);
+    Ctrl.prototype = Object.create(BillController.prototype);
 
     return (Ctrl);
 
