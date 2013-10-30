@@ -40,8 +40,8 @@
                 pre: function (scope, element, attrs, ctrls) {
                     var selectCtrl = ctrls[0];
                     var ngModelCtrl = ctrls[1];
-                    //var datasource = ngModelCtrl.$viewValue;
-                    var table = $('table', element);
+                    var table = $('<table></table>');
+                    $(element).append(table);
                     var options = {};
                     var dataquery = null;
                     var gridOptions = null;

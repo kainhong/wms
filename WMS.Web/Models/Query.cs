@@ -17,6 +17,9 @@ namespace WMS.Web.Models
 
         [DataMember(Name = "parameters")]
         public List<Parameter> Parameters { get; set; }
+
+        [DataMember(Name = "isDynamic")]
+        public bool IsDynamic { get; set; }
     }
 
     [DataContract]
@@ -26,7 +29,7 @@ namespace WMS.Web.Models
         public string FeildName { get; set; }
 
         [DataMember(Name = "value")]
-        public string Value { get; set; }
+        public object Value { get; set; }
 
         [DataMember(Name = "Operation")]
         public string Operation { get; set; }

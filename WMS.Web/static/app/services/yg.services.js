@@ -19,11 +19,11 @@ services.factory('Menu', function ($resource, $http) {
 services.factory('Module', function ($resource, $http) {
     var service = $resource('/api/module/:action/?id=:id', { id: "@id", action: '@action' }, {
         getModuleQuery: { method: "GET", params: { id: '@id', action: 'getmodulequery' }, isArray: true },
-        getQueryData: {
+        getData: {
             method: "GET",
-            params: { id: '@id', name: '@name', action: 'getQueryData' },
+            params: { id: '@id', name: '@name', exp: '@exp', action: 'getQueryData' },
             isArray: false,
-            url: '/api/module/:action/?moduleid=:id&queryName=:name'
+            url: '/api/module/:action/?moduleid=:id&queryName=:name&condition=:exp'
         },
         getFieldDataSource: {
             method: "GET",
@@ -46,14 +46,22 @@ services.factory('Module', function ($resource, $http) {
 
 services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, $log, $q) {
     function DataQuery(scope) {
+        this.$scope = scope.$new();
         this.view = null;
-        this.data = null;
+        this.datasource = null;
         this.options = {};
         this.scope = scope;
         this.visible = false;
         this.preConditions = null;
         var inited = false;
 
+        this.$on = function (name, callback) {
+            this.$scope.$on(name, callback);
+        }
+
+        this.$broadcast = function (name, args) {
+            this.$scope.$broadcast(name, args);
+        }
 
         /* private methods */
         function wrapEvent(query) {
@@ -65,8 +73,9 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                     return;
                 options[name] = function () {
                     var args = []; // arguments;
-                    for (var i in arguments)
-                        args.push(arguments[i]);
+                    angular.forEach(arguments, function (val, index) {
+                        args.push(val);
+                    });                     
                     args.dataquery = query;
                     scope.$broadcast(name, args);
                 };
@@ -76,6 +85,9 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
         function getEditor(col) {
             var editor = $.getRenderer(col.$field);
             col.editor = editor;
+            if (!editor || !editor.type)
+                return null;
+
             var defaults = $.fn[editor.type].defaults;
 
             if (defaults && defaults.hasOwnProperty('data')) {
@@ -157,10 +169,13 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             this.init();
             var view = this.view;
             var options = this.options;
-            view.datagrid(options);
-            view.datagrid('loading');
-            Module.getQueryData({ id: this.ModuleID, name: this.Name }, function (data) {
+            if (view) {
+                view.datagrid(options);
+                view.datagrid('loading');
+            }
+            Module.getData({ id: this.ModuleID, name: this.Name }, function (data) {
                 options.data = data;
+                self.datasource = data.rows;
                 view.datagrid('loaded');
                 view.datagrid(options);
             }, function (error) {
@@ -168,23 +183,49 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             });
         };
 
-        this.open = function (dataRow) {
+        this.open = function (condition) {
             var self = this;
-            var query = self.preConditions
-            if (dataRow) {
-                for (var name in dataRow) {
-                    var p = { feildName: name, value: dataRow[name], operation: null };
-                    query.parameters.push(p);
+            var param = null; //
+            var action = null;
+            var view = this.view;
+            if (condition && typeof condition == 'object') {
+                param = self.preConditions;
+                if (!param) {
+                    param = {
+                        moduleId: this.ModuleID,
+                        dataQueryName: this.Name,
+                        parameters: []
+                    };
                 }
+                param.isDynamic = false;
+                for (var name in condition) {
+                    var p = { feildName: name, value: condition[name], operation: null };
+                    param.parameters.push(p);
+                }
+                action = Module.query(param).$promise;
             }
-            view.datagrid('loading');
-            Module.query(query, function (data) {
-                var opt = view.datagrid('options');
-                opt = $.extend(opt, { data: data });
-                view.datagrid(opt);
-                view.datagrid('loaded');
+            else {
+                var exp = self.AliasTableName + '.' + self.scope.BillNOFieldName + " = '" + condition + "'";
+                param = { id: self.ModuleID, name: self.Name, exp: exp };
+                action = Module.getData(param).$promise;
+            }
+            if (view)
+                view.datagrid('loading');
+
+            action.then(function (data) {
+                self.options.data = data;
+                self.datasource = data.rows;
+                if (view) {
+                    var opt = view.datagrid('options');
+                    opt = $.extend(opt, { data: data });
+                    view.datagrid(opt);
+                    view.datagrid('loaded');
+                }
+                self.$broadcast('opened', {});
+
             }, function (error) {
-                view.datagrid('loaded');
+                if (view)
+                    view.datagrid('loaded');
             });
         };
 
@@ -195,7 +236,8 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             var query = {
                 moduleId: this.ModuleID,
                 dataQueryName: this.Name,
-                parameters: []
+                parameters: [],
+                isDynamic: true
             };
 
             angular.forEach(conditions, function (value, index) {
@@ -272,13 +314,14 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
 
         this.remove = function () {
             var rowindex = this.focusRowIndex;
-            if (rowindex >= 0)
+            if (rowindex >= 0 && this.view)
                 this.view.datagrid('deleteRow', rowindex);
         }
 
         this.save = function () {
             var data = {};
-            // inserted,deleted,updated
+            if (!this.view)
+                return;
             data.modified = this.view.datagrid('getChanges', 'updated');
             data.added = this.view.datagrid('getChanges', 'inserted');
             data.deleted = this.view.datagrid('getChanges', 'deleted');
@@ -295,7 +338,7 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
         return obj;
     }
 
-    var create = function (scope,queries,current) {
+    var create = function (scope, queries, current) {
         scope.queries = queries;
         angular.forEach(queries, function (query, index) {
             var item = make(scope, query);
@@ -305,8 +348,8 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
         if (scope.queries.length > 0) {
             if (scope.queries.length == 1)
                 scope.currentDataQuery = scope.queries[0]
-            else if (scope.queries.hasOwnProperty('dqBillList'))
-                scope.currentDataQuery = scope.queries.dqBillList;
+            else if (current && scope.queries.hasOwnProperty(current))
+                scope.currentDataQuery = scope.queries[current];
             else
                 scope.currentDataQuery = scope.queries.dqMaster;
         }

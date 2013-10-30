@@ -12,6 +12,7 @@ using System.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Web.Http.ModelBinding;
+using System.Text.RegularExpressions;
 
 namespace WMS.Web.Controllers
 {
@@ -33,9 +34,9 @@ namespace WMS.Web.Controllers
         public DataQueryCollection GetModuleQuery(int id)
         {
             return service.GetModuleQuery(id);
-        }               
+        }
 
-        public QueryResult GetQueryData(int moduleId,string queryName)
+        public QueryResult GetQueryData(int moduleId, string queryName, string condition)
         {
             DataQueryCollection lst = service.GetModuleQuery(moduleId);
             var query = lst.FirstOrDefault(c => c.Name == queryName);
@@ -45,6 +46,9 @@ namespace WMS.Web.Controllers
             {
                 var cmd = con.CreateCommand();
                 cmd.CommandText = query.SelectSQL;
+                if(!string.IsNullOrEmpty(condition) )
+                    cmd.CommandText += " WHERE " + condition;
+
                 cmd.Connection = con;
                 con.Open();
                 var rd = cmd.ExecuteReader();
@@ -103,28 +107,32 @@ namespace WMS.Web.Controllers
             if (q == null)
                 return null;
             var script = q.SelectSQL;
-            List<string> conditions = new List<string>();
-            Dictionary<string,object> parameters = new Dictionary<string,object>();
-            foreach (var p in query.Parameters)
+            Dictionary<string, object> parameters = null;// new Dictionary<string, object>()
+            if (query.IsDynamic)
             {
-                var field = q.Fields[p.FeildName];
-                var val = p.Value;
-                if (string.IsNullOrEmpty(val))
-                    continue;
-                string format = field.DataType == DbType.String ? "{0} = '{1}'" : "{0} = {1}";
-                conditions.Add(string.Format(format, p.FeildName, p.Value));
-                //conditions.Add()
+                script = GetWhereStatement(query, q);
             }
-            var where = string.Join(" AND ", conditions.ToArray());
-            if( !string.IsNullOrEmpty(where))
-                script += " WHERE " + where;
-
+            else
+            {
+                script = ParseScript(query, q, out parameters);
+                
+            }
 
             using (var con = Unity.GetConnection())
             {
                 var cmd = con.CreateCommand();
                 cmd.CommandText = script;
                 cmd.Connection = con;
+                if (parameters.Count > 0)
+                {
+                    foreach (var key in parameters.Keys)
+                    {
+                        var p = cmd.CreateParameter();
+                        p.ParameterName = ":" + key;
+                        p.Value = parameters[key];
+                        cmd.Parameters.Add(p);
+                    }
+                }
                 con.Open();
                 var rd = cmd.ExecuteReader();
                 var dt = new DataTable();
@@ -136,12 +144,50 @@ namespace WMS.Web.Controllers
             }
             
         }
-        
+
+        private string GetWhereStatement(Query query,DataQuery q)
+        {
+            var script = q.SelectSQL;
+            List<string> conditions = new List<string>();
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            foreach (var p in query.Parameters)
+            {
+                var field = q.Fields[p.FeildName];
+                var val = p.Value;
+                //if (string.IsNullOrEmpty(val))
+                if( val == null)
+                    continue;
+                string format = field.DataType == DbType.String ? "{0} = '{1}'" : "{0} = {1}";
+                conditions.Add(string.Format(format, p.FeildName, p.Value));                
+            }
+            var where = string.Join(" AND ", conditions.ToArray());
+            if (!string.IsNullOrEmpty(where))
+                script += " WHERE " + where;
+            return script;
+        }
+         
+
         public ActionResult<bool> PostSaveData(int moduleid, string queryName,
             [ModelBinder(typeof(DataRecordModelBinder))]DataRecords datas)
         {
 
             return null;
+        }
+
+        Regex regex = new Regex(@"(?<name>@\b\w+\b)");
+        private string ParseScript(Query query, DataQuery q, out Dictionary<string, object> @params)
+        {
+            var script = q.SelectSQL;
+            var dict = new Dictionary<string, object>();
+            var val = regex.Replace(script,new MatchEvaluator( m => {
+                var name = m.Groups["name"].Value.TrimStart('@');
+                var field = query.Parameters.FirstOrDefault(f => string.Compare(f.FeildName, name, true) == 0);
+                dict[name] = field.Value;
+                return ":" + name;
+            }));
+            @params = dict;
+
+            return val;
         }
     }
 }

@@ -23,14 +23,14 @@ app.provider({
 
         core.controller(name,
 			function ($scope, $injector) {
-				var cacheKey = ("cache_" + name);
-				var Constructor = constructors[cacheKey];
+			    var cacheKey = ("cache_" + name);
+			    var Constructor = constructors[cacheKey];
 
-				if (!Constructor) {
-					Constructor= constructors[cacheKey] = $injector.invoke(controllerFactory)
-				}
+			    if (!Constructor) {
+			        Constructor = constructors[cacheKey] = $injector.invoke(controllerFactory)
+			    }
 
-				return $injector.instantiate(Constructor,{"$scope": $scope});
+			    return $injector.instantiate(Constructor, { "$scope": $scope });
 			}
 		);
         return (core);
@@ -86,14 +86,15 @@ app.factory(
 	            $scope.moduleId = moduleId;
 	            var query = Module.getModuleQuery({ id: moduleId }).$promise;
 	            var then = query.then(function (data) {
-	                $scope.queries = DataQueryFactory.create($scope, data);
-                    if ($scope.currentDataQuery) {
+	                $scope.queries = DataQueryFactory.create($scope, data, null);
+	                if ($scope.currentDataQuery) {
 	                    $scope.currentDataQuery.visible = true;
 	                    $scope.currentDataQuery.init(function () {
 	                        $scope.conditions = $scope.currentDataQuery.getConditionFields();
 	                    });
 	                }
 	            });
+	            return then;
 	        };
 
 	        BaseController.prototype = {
@@ -105,6 +106,79 @@ app.factory(
 	}
 );
 
+app.factory('BillController', function (BaseController, Module, DataQueryFactory, $timeout) {
+
+    function BillController($scope, Module, DataQueryFactory) {
+        $scope.viewType = "bill";
+        function load() {
+            $scope.queries.dqMaster.$on('opened', function (event, args) {
+                var master = $scope.queries.dqMaster;
+                if (master.datasource && master.datasource.length > 0) {
+                    master.focusRowIndex = 0;
+                    master.focusRow = master.datasource[0];
+                    $timeout(function () {
+                        $scope.queries.dqDetail.open(master.focusRow);
+                    }, 100);
+                }
+            });
+        }
+
+        $scope.changeView= function(viewtype) {
+            $timeout(function () {
+                $scope.viewType = viewtype;
+            },10);
+        }
+
+        $scope.$on('onDblClickRow', function (event, args) {
+            //console.log(query);
+            var query = args.dataquery;
+            if (query.Name != 'dqBillList') {
+                $scope.changeView('bill');
+                return;
+            }
+            $scope.changeView("list");
+            var row = query.focusRow;
+            if (row == null)
+                return;
+            var billNO = row[$scope.BillNOFieldName];
+            if (billNO == $scope.billNO)
+                return;
+
+            $scope.billNO = billNO;
+            //$scope.$digest();
+            if (billNO && $scope.queries.dqMaster) {
+                $timeout(function () {
+                    $scope.queries.dqMaster.open(billNO);
+                }, 100);
+            }
+        });
+
+        BaseController.call(this, $scope, Module, DataQueryFactory);
+
+        BillController.prototype.init = this.init = function (moduleId, current) {
+            $scope.moduleId = moduleId;
+            var query = Module.getModuleQuery({ id: moduleId }).$promise;
+            var then = query.then(function (data) {
+                $scope.queries = DataQueryFactory.create($scope, data, 'dqBillList');
+                if ($scope.currentDataQuery) {
+                    $scope.currentDataQuery.visible = true;
+                    $scope.currentDataQuery.ReadOnly = true;
+                    $scope.currentDataQuery.Editable = false;
+                    $scope.currentDataQuery.init(function () {
+                        $scope.conditions = $scope.currentDataQuery.getConditionFields();
+                    });
+                }
+            }).then(load);
+
+            return then;
+        }
+    }
+
+    BillController.prototype = Object.create(BaseController.prototype);
+
+    return (BillController);
+}
+);
 
 
 //app.factory("app.SubController",

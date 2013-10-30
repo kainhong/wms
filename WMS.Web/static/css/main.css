@@ -1,4 +1,8 @@
-﻿.detail,.search-panel
+﻿.detail
+{
+    padding-top:20px;
+}
+.detail,.search-panel
 {
     width:100%;
     display:block;
