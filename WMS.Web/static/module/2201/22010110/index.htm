@@ -17,38 +17,37 @@
     <link href="/static/css/main.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-    <div ng-controller='app.Ctrl'>          
-        <div tool-bar on-item-click="onItemClick(item)" style="margin-bottom: 0px; background: #F4F4F4; height: 26px; padding: 5px;">
+    <div ng-controller='app.Ctrl'>
+        <div tool-bar on-item-click="onItemClick(item)" style="margin-bottom: 0px; background: #F4F4F4;
+            height: 26px; padding: 5px;">
             <a bar-item iconcls='icon-add' key="add" disable='currentDataQuery.ReadOnly'>Add</a>
             <a bar-item iconcls='icon-remove' key="remove" disable='currentDataQuery.ReadOnly'>Remove</a>
             <a bar-item iconcls='icon-save' key="save" disable='currentDataQuery.ReadOnly'>Save</a>
             <a bar-item iconcls='icon-search' key="export">Export</a>
         </div>
-        <div ng-switch on="viewType">
-            <div ng-switch-when="bill">
-                <div class='search-panel' ng-model='conditions' yg-search='search()'>
-                </div>
-                <div gridview style="width: 100%; disply: inline-block;" ng-model='datasource'
-                    dataquery='queries.dqBillList'>
-                </div>
+        <div class='search-panel' ng-model='conditions' yg-search='search()'>
+        </div>
+        <div ng-show='currentDataQuery.visible'>
+            <div gridview style="width: 100%;" ng-model='datasource' dataquery='queries.dqDetail'
+                on-click-cell="onClickCell(element,rowIndex,field,value)" on-click-row="onClickRow(element,rowIndex,rowData)"
+                on-dbl-click-cell="onDblClickCell()">
+                <table>
+                </table>
             </div>
-            <div ng-switch-when="list">
-                <div class="detail" ng-click="changeView('bill')">
-                    <legend>Bill Detail</legend>
-                    <fieldset yg-detail-panel dataquery='queries.dqMaster'>
-                    </fieldset>
+            <div class="detail">
+                <h1>
+                    Detail</h1>
+                <div yg-detail-panel dataquery='currentDataQuery' ng-disabled='!currentDataQuery.focusRow'>
                 </div>
-                <div gridview style="width: 100%; disply: inline-block; height: 400px; padding-top: 20px;"
-                    ng-model='datasource' dataquery='queries.dqDetail'>
-                </div>
+                <button ng-clic="updateRow()">Update</button>
             </div>
         </div>
     </div>
 </body>
-<script src="/static/app/directives/yg.detialpanel.js" type="text/javascript"></script>
-<script src="/static/app/directives/yg.editor.js" type="text/javascript"></script>
 <script src="/static/app/services/yg.core.js" type="text/javascript"></script>
 <script src="controller.js" type="text/javascript"></script>
+<script src="/static/app/directives/yg.detialpanel.js" type="text/javascript"></script>
+<script src="/static/app/directives/yg.editor.js" type="text/javascript"></script>
 <script>
     angular.bootstrap(document.body, ['app']);
 </script>

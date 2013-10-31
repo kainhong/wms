@@ -4,7 +4,7 @@
 app.factory("app.Ctrl", function (BillController, Module, DataQueryFactory) {
 
     function Ctrl($scope, Module, DataQueryFactory) {
-        $scope.BillNOFieldName = 'BillNO';
+        $scope.BillNOFieldName = 'ADJ_NO';
 
         BillController.call(this, $scope, Module, DataQueryFactory);
 

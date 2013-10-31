@@ -300,9 +300,11 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             return columns;
         };
 
-        this.add = function () {
-            var obj = {};
-            angular.forEach(this.Fields, function (index, field) {
+        this.add = function (newObj) {
+            var obj = newObj;
+            if (obj == null)
+                obj = {};
+            angular.forEach(fields, function (index, field) {
                 var val = field.DefaultValue;
                 obj[field.FieldName] = val;
             });

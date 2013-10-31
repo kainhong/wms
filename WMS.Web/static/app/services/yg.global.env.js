@@ -1,5 +1,5 @@
 ﻿var ygEnvirment = angular.module('ui.envirment', []);
-ygEnvirment.factory('envirmentSharedService', function ($rootScope) {
+ygEnvirment.factory('env', function ($rootScope) {
     var sharedService = {};
 
     sharedService.broadcast = function (event, msg) {

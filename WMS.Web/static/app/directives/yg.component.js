@@ -15,7 +15,7 @@ uimodule.directive('ygMenu', ['$parse', function ($parse) {
     return {
         restrict: 'A',
         transclude: true,
-        controller: function ($scope, $element, envirmentSharedService, System, Menu) {
+        controller: function ($scope, $element, env, System, Menu) {
             var self = this;
             System.list({}, function (data) {
                 makeTabs($element, data);
@@ -40,11 +40,14 @@ uimodule.directive('ygMenu', ['$parse', function ($parse) {
                     {
                         data:data,
                         checkbox: false,
+                        formatter:function(node){
+                            return node.text + '(' + node.attributes.moduleId + ')';
+                        },
                         onClick: function (node) {
                             $scope.$apply(function () {
                                 self.nodeClick($scope, { node: node });
                             });
-                            envirmentSharedService.broadcast("global.tree.node.selected", node);
+                            env.broadcast("global.tree.node.selected", node);
                         }
                     });
                 });
@@ -63,19 +66,22 @@ uimodule.directive('ygMenu', ['$parse', function ($parse) {
     };
 } ]);
 
-uimodule.directive('ygTabs', function () {
+uimodule.directive('ygTabs',['$timeout', function ($timeout) {
     return {
         restrict: 'AC',
-        controller: function ($scope, $element, envirmentSharedService) {
-            var panes = $scope.panes = [];
-            envirmentSharedService.on('global.tree.node.selected',
+        controller: function ($scope, $element, env) {
+            var panes = [];
+            env.on('global.tree.node.selected',
                 function (event, msg) {
                     var node = msg;
                     if (!node)
                         return;
-
                     if (node.attributes.moduleId == undefined || node.attributes.moduleId == null)
                         return;
+
+                    $timeout(function(){
+                        $scope.recentModules.push(node),10});
+
                     if (!$element.tabs('exists', node.text)) {
                         addTab(node);
                     } else {
@@ -107,7 +113,7 @@ uimodule.directive('ygTabs', function () {
 
         replace: false
     };
-})
+}])
 
 uimodule.directive('toolBar', ['$parse', function ($parse) {
     return {
@@ -146,7 +152,8 @@ uimodule.directive('toolBar', ['$parse', function ($parse) {
         replace: true,
         transclude: true
     };
-} ])
+}])
+
 .directive('barItem', function () {
     return {
         require: "^toolBar",
@@ -174,6 +181,23 @@ uimodule.directive('toolBar', ['$parse', function ($parse) {
         }
     };
 })
+
+.directive('contextMenu', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs, tooBarCtrl) {
+            $(element).menu({
+                onClick: function (item) {
+                    console.log(item);
+                }
+            });
+        },
+        template:'<div>New</div>' +
+                "<div data-options=\"iconCls:'icon-save'\">Save</div>" +
+                "<div data-options=\"iconCls:'icon-print'\">Print</div>" +
+                "<div class='menu-sep'></div>" + 
+                "<div>Exit</div>"    }
+});
 
 
 

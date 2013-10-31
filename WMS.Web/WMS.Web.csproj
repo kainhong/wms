@@ -67,6 +67,9 @@
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Optimization">
+      <HintPath>..\lib\System.Web.Optimization.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -101,6 +104,10 @@
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.20710.0\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -460,17 +467,25 @@
     <Content Include="static\lib\jquery-2.0.3.js" />
     <Content Include="static\lib\jquery.easyui.min.js" />
     <Content Include="static\lib\jquery.js" />
+    <Content Include="static\lib\mousetrap.min.js" />
     <Content Include="static\lib\require.js" />
     <Content Include="static\lib\sea-debug.js" />
     <Content Include="static\lib\yg.lsp.ext.js" />
     <Content Include="static\module\2201\22010070\controller.js" />
     <Content Include="static\module\2201\22010070\index.htm" />
     <Content Include="static\module\2201\22010070\toolbar.htm" />
+    <Content Include="static\module\2201\22010110\controller.js" />
+    <Content Include="static\module\2201\22010110\index.htm" />
     <Content Include="static\module\2205\22050010\controller.js" />
     <Content Include="static\module\2205\22050010\index.htm" />
-    <Content Include="static\module\2206\22060020\index.html" />
+    <Content Include="static\module\2206\22060020\controller.js" />
+    <Content Include="static\module\2206\22060020\index.htm" />
+    <Content Include="static\module\controller.js" />
+    <Content Include="static\module\index.htm" />
     <Content Include="static\module\SubControllerDemo.htm" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -489,9 +504,6 @@
     <Folder Include="static\images\" />
     <Folder Include="static\lib\easyUI\css\" />
     <Folder Include="static\view\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="static\lib\easyUI\themes\black\images\Thumbs.db" />

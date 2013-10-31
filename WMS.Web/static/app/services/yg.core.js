@@ -65,6 +65,7 @@ app.factory(
 	            }
 	        }
 
+
 	        $scope.search = function () {
 	            var query = $scope.currentDataQuery;
 	            query.search($scope.conditions);

@@ -1,11 +1,4 @@
-﻿//angular.module('yg.directives.editor').factory('widgetFactory', ['$parse', '$log', function($parse, $log) {
-//    var create = function(editor)
-//    {
-//
-//    };
-//    return create;
-//}]);
-
+﻿
 uimodule.factory('editorFactory', ['$timeout', '$parse',
   function ($timeout, $parse) {
 

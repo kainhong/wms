@@ -12,18 +12,18 @@
     })()
 }
 
-angular.$wrapEventFunction = function (scope,element,name,fun) {
+angular.$wrapEventFunction = function (scope, element, name, fun) {
     var value = name;
     var arglist = value.substring(value.indexOf('(') + 1, value.indexOf(')')).split(',');
     for (var i = 0; i < arglist.length; i++) {
         arglist[i] = $.trim(arglist[i]);
     }
 
-    return function (event,args) {
+    return function (event, args) {
         //var args = arguments;
-        var locals = {element:element};        
+        var locals = { element: element };
         for (var i = 0; i < args.length; i++) {
-            locals[arglist[i+1]] = args[i];
+            locals[arglist[i + 1]] = args[i];
         }
         scope.$apply(function () {
             fun(scope, locals);
@@ -95,6 +95,6 @@ $.extend({
 
         return;
     }
-  
+
 });
 

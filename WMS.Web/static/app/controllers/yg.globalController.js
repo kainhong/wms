@@ -12,12 +12,19 @@ app.provider({
     }
 });
 
-app.controller('globalCtrl', ['$scope', 'System', function ($scope, System) {
+app.controller('globalCtrl', ['$scope', 'System','env', function ($scope, System,env) {
     System.list({}, function (data) {
         $scope.systems = data[0];
     });
 
+    $scope.recentModules = [];
     $scope.menuClick = function (node) {
-        //alert(node.attributes.moduleId);
+       
+    }
+
+    $scope.openModule = function(module)
+    {
+        env.broadcast("global.tree.node.selected", module);
+        return false;
     }
 } ]);
