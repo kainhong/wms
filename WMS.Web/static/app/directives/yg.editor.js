@@ -98,9 +98,8 @@ uimodule.factory('editorFactory', ['$timeout', '$parse',
        var initFun = editor.init;
        editor.init = function(container, options)
        {
-            var target = initFun(container,options);
-            //target.options = options || {};
-            return target;
+           target = initFun(container, options);
+           return target;
        }
        //editor.cellValue = null;
        editor.setValue = function(target,value){
@@ -111,7 +110,7 @@ uimodule.factory('editorFactory', ['$timeout', '$parse',
        editor.getValue = function(target){
           var val = getFun(target);
           var grid = target.parents('.datagrid-view').children('table');
-          var fun = grid.datagrid('options').onCellValueChanged;
+          var fun = grid.datagrid('options').onCellValueChanged;          
           if( fun && target.cellValue != val)
             fun.apply(grid,[val]);
             

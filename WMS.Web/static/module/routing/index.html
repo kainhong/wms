@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title></title>
+    <script src="/static/lib/angular.js"></script>
+    <script src="/static/lib/angular-route.js"></script>
+    <script src="controller.js"></script>
+</head>
+<body>
+    <div ng-controller="ctrl">
+        <div>{{todo}}</div>
+        <hr />
+        <div ng-view></div>
+    </div>
+</body>
+</html>

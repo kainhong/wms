@@ -4,8 +4,7 @@
     var app = angular.module('app', []);
 
     app.controller('ctrl', ['$scope', function ($scope) {
-        $scope.name = ' world!';
-        //$('#n').html('abc');
+        $scope.name = ' world!';       
     }]);
    
     return {

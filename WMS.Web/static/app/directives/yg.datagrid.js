@@ -69,6 +69,10 @@
                             if (dataquery.AutoOpen)
                                 dataquery.load();
                         });
+
+                        dataquery.$on('onClickRow', function (event, args) {                           
+                            selectCtrl.onClickRow(args[0]);
+                        });
                     });
                 }                
 
@@ -84,13 +88,7 @@
                     scope.$on(action, callback);
                 });
 
-                scope.$on('onClickRow', function (event, args) {
-                    dataquery.focusRowIndex = args[0];
-                    dataquery.focusRow = args[1];
-                    scope.$digest();
-                    scope.currentDataQuery = dataquery;
-                    selectCtrl.onClickRow(args[0]);
-                });
+                
 
             },
             post: function (scope, element, attrs, ctrl) {

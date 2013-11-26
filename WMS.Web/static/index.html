@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html ng-app="plunker">
+
+<head>
+    <meta charset="utf-8" />
+    <title>AngularJS Plunker</title>
+    <script src="../../static/lib/angular.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+</head>
+
+<body ng-controller="MainCtrl">
+    <input type="text" datepicker ng-model="date">
+
+    <span>{{date}}</span>
+</body>
+
+<script>
+    angular.module('component', []).directive('datepicker', function () {
+        return {
+            restrict: 'A',
+            require: ['datepicker', '?ngModel'],
+            controller: function ($scope, $element) {
+
+            },
+            link: function (scope, element, attrs, ctrls) {
+                var ngModelCtrl = ctrls[1];
+                $(element).datepicker(
+                    {
+                        onSelect: function (value, obj) {
+                            scope.$apply(function () {
+                                ngModelCtrl.$setViewValue(value);
+                            });
+                        }
+                    });
+            }
+        }
+    });
+
+    var app = angular.module('plunker', ['component']);
+    app.provider({
+        $exceptionHandler: function () {
+            var handler = function (exception, cause) {
+
+            };
+
+            this.$get = function () {
+                return handler;
+            };
+        }
+    });    
+
+    app.controller('MainCtrl', function ($scope) {
+        $scope.name = 'World';
+        $scope.date = new Date();
+    });
+
+</script>
+</html>

@@ -31,6 +31,9 @@
                     </div>
                 </div>
                 <div title="最近使用">
+                    <div>
+                        <select yg-module-finder></select>
+                    </div>
                     <ul>
                         <li ng-repeat="item in recentModules">
                             <label style="cursor:hand;" ng-click="openModule(item)">[{{item.attributes.moduleId}}]{{item.text}}</label>

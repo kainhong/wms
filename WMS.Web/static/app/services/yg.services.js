@@ -1,5 +1,10 @@
 ﻿var services = angular.module("yg.services", ['ngResource']);
 
+services.config( function ($httpProvider) {
+    //$httpProvider.defaults.headers.post = { 'Content-Type': 'application/x-www-form-urlencoded' };
+})
+
+
 services.factory('System', function ($resource, $http) {
     var service = $resource('/api/system', {
 
@@ -46,21 +51,22 @@ services.factory('Module', function ($resource, $http) {
 
 services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, $log, $q) {
     function DataQuery(scope) {
-        this.$scope = scope.$new();
+        var $scope = scope.$new();
+        var self = this;
         this.view = null;
         this.datasource = null;
-        this.options = {};
+        this.options = { rownumbers: true, singleSelect: true };
         this.scope = scope;
         this.visible = false;
         this.preConditions = null;
         var inited = false;
 
         this.$on = function (name, callback) {
-            this.$scope.$on(name, callback);
+            $scope.$on(name, callback);
         }
 
         this.$broadcast = function (name, args) {
-            this.$scope.$broadcast(name, args);
+            $scope.$broadcast(name, args);
         }
 
         /* private methods */
@@ -75,16 +81,32 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                     var args = []; // arguments;
                     angular.forEach(arguments, function (val, index) {
                         args.push(val);
-                    });                     
+                    });
                     args.dataquery = query;
-                    scope.$broadcast(name, args);
+                    $scope.$broadcast(name, args);
                 };
+            });
+
+            $scope.$on('onClickCell', function (event, args) {               
+                var fieldName = args[1];
+                angular.forEach(query.Fields, function (item, index) {
+                    if (item.FieldName == fieldName) {
+                        query.focusColumn = item;
+                        query.focusColumnIndex = index;
+                    }
+                });
+              
+            });
+
+            $scope.$on('onClickRow', function (event, args) {
+                scope.currentDataQuery = query;
+                query.focusRowIndex = args[0];
+                query.focusRow = args[1];
             });
         }
 
         function getEditor(col) {
             var editor = $.getRenderer(col.$field);
-            col.editor = editor;
             if (!editor || !editor.type)
                 return null;
 
@@ -133,6 +155,18 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             });
         }
 
+        function handleCellValueChanged(col) {
+            var field = col.$field;
+            if (!(field.DispValueType == 'dvtSQL' && field.DisplayValue && field.DisplayValue.length > 0))
+                return;
+            var self = this;
+            $scope.$on('onCellValueChanged', function (event, args) {
+                //console.log(args);
+                self.hasChanged = true;
+            });
+        }
+
+
         /* publish methods */
         this.init = function (callback) {
             if (inited) {
@@ -140,6 +174,7 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                     callback();
                 return;
             }
+            inited = true;
             wrapEvent(this);
             var query = this;
             angular.forEach(this.Fields, function (field, index) {
@@ -157,9 +192,9 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                 if (callback)
                     callback();
             }, function (reason) {
-                alert('Failed: ' + reason);
+                //alert('Failed: ' + reason);
             }, function (update) {
-                alert('Got notification: ' + update);
+                //alert('Got notification: ' + update);
             });
         }
 
@@ -172,7 +207,8 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             if (view) {
                 view.datagrid(options);
                 view.datagrid('loading');
-            }
+            };
+
             Module.getData({ id: this.ModuleID, name: this.Name }, function (data) {
                 options.data = data;
                 self.datasource = data.rows;
@@ -229,7 +265,6 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             });
         };
 
-
         this.search = function (conditions) {
             var self = this;
             var view = self.view;
@@ -278,6 +313,7 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
             if (columns)
                 return columns;
             var ary = [];
+            ary.push({ field: 'ck', title: '', width: 50, checkbox: true });
             var query = this;
             angular.forEach(this.Fields, function (field, index) {
                 if (!field.VisibleInGrid)
@@ -287,13 +323,17 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                     field: field.FieldName,
                     title: field.Caption,
                     width: field.DisplayWidth,
+                    checkbox:index==0,
                     sortable: true
                 };
 
                 if (!query.Editable || field.ReadOnly)
                     col.editor = null;
                 else
-                    col.editor = getEditor(col)// 'text';
+                    col.editor = getEditor(col)// 'text'; 
+
+                handleCellValueChanged(col);
+
                 ary.push(col);
             });
             columns = [ary]
@@ -309,6 +349,7 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                 obj[field.FieldName] = val;
             });
 
+            this.hasChanged = true;;
             if (this.view)
                 this.view.datagrid('appendRow', obj);
             return obj;
@@ -316,8 +357,11 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
 
         this.remove = function () {
             var rowindex = this.focusRowIndex;
-            if (rowindex >= 0 && this.view)
+
+            if (rowindex >= 0 && this.view) {
                 this.view.datagrid('deleteRow', rowindex);
+                this.hasChanged = true;;
+            }
         }
 
         this.save = function () {
@@ -331,7 +375,14 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
                 window.alert('没有需要保存的数据');
                 return;
             }
-            Module.saveData({ id: this.ModuleID, name: this.Name, data: data });
+
+            Module.saveData({ id: this.ModuleID, name: this.Name, data: data },
+                function (data) {
+                    this.hasChanged = false;
+                }, function (error) {
+                    console.log(error);
+                }
+            );
         }
     };
 
@@ -359,4 +410,4 @@ services.factory('DataQueryFactory', ['Module', '$log', '$q', function (Module, 
     }
 
     return { create: create };
-} ]);
+}]);

@@ -1,9 +1,9 @@
 ﻿//var app = angular.module('app', ['ui.component', 'yg.services', 'ui.envirment']);
 
 
-app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
+app.factory("app.Ctrl", function (BaseController,$location, Module, DataQueryFactory) {
 
-    function Ctrl($scope, Module, DataQueryFactory) {
+    function Ctrl($scope, $location, Module, DataQueryFactory) {
         $scope.updateRow = function () {
             var dataQuery = $scope.currentDataQuery;
             if (!dataQuery)
@@ -18,7 +18,7 @@ app.factory("app.Ctrl", function (BaseController, Module, DataQueryFactory) {
             });
         };
 
-        BaseController.call(this, $scope, Module, DataQueryFactory);
+        BaseController.call(this, $scope, $location, Module, DataQueryFactory);
         this.init('22010110');
     }
 

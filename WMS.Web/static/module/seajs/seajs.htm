@@ -14,14 +14,14 @@
     </div>
  <script>
      seajs.config({
-         base: "../",
+         base: "../../",
          alias: {
              "jquery": "lib/jquery.js",
              "angular": "lib/angular.js"
          }
      });
 
-     seajs.use("../module/controller", function (app) {
+     seajs.use("../ngview/controller", function (app) {
          app.init()
      });
  </script>    

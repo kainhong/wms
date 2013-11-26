@@ -169,6 +169,7 @@
     <Content Include="static\app\services\yg.global.env.js" />
     <Content Include="static\app\services\yg.services.js" />
     <Content Include="static\css\main.css" />
+    <Content Include="static\index.html" />
     <Content Include="static\lib\angular-animate.js" />
     <Content Include="static\lib\angular-cookies.js" />
     <Content Include="static\lib\angular-kendo.js" />
@@ -473,16 +474,20 @@
     <Content Include="static\lib\yg.lsp.ext.js" />
     <Content Include="static\module\2201\22010070\controller.js" />
     <Content Include="static\module\2201\22010070\index.htm" />
-    <Content Include="static\module\2201\22010070\toolbar.htm" />
     <Content Include="static\module\2201\22010110\controller.js" />
     <Content Include="static\module\2201\22010110\index.htm" />
     <Content Include="static\module\2205\22050010\controller.js" />
     <Content Include="static\module\2205\22050010\index.htm" />
     <Content Include="static\module\2206\22060020\controller.js" />
     <Content Include="static\module\2206\22060020\index.htm" />
-    <Content Include="static\module\controller.js" />
+    <Content Include="static\module\routing\controller.js" />
+    <Content Include="static\module\routing\index.html" />
+    <Content Include="static\module\seajs\controller.js" />
     <Content Include="static\module\index.htm" />
-    <Content Include="static\module\SubControllerDemo.htm" />
+    <Content Include="static\module\index2.html" />
+    <Content Include="static\module\routing\detail.html" />
+    <Content Include="static\module\routing\list.html" />
+    <Content Include="static\module\seajs\seajs.htm" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

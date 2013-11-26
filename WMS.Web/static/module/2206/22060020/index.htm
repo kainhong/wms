@@ -41,6 +41,13 @@
                 <div gridview style="width: 100%; disply: inline-block; height: 400px; padding-top: 20px;"
                     ng-model='datasource' dataquery='queries.dqDetail'>
                 </div>
+                <div>
+                    <label>单据状态:</label><span>{{billState.STATUS | billStatus }}</span>
+                    <label>制单人:</label><span>{{billState.CREATORNAME}}</span>
+                    <label>制单日期:</label><span>{{billState.CREATETM}}</span>
+                    <label>审核人:</label><span>{{billState.AUDITORNAME}}</span>
+                    <label>审核日期:</label><span>{{billState.AUDITTM}}</span>
+                </div>
             </div>
         </div>
     </div>
