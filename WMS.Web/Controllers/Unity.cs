@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Data.Common;
-using Oracle.DataAccess.Client;
+using MySql.Data.MySqlClient;
 using System.IO;
-using ICSharpCode.SharpZipLib.GZip;
 using System.Xml.Serialization;
+using ICSharpCode.SharpZipLib.GZip;
 namespace WMS.Web.Controllers
 {
     public static class Unity
@@ -16,13 +16,13 @@ namespace WMS.Web.Controllers
         {
             get
             {
-                return System.Configuration.ConfigurationManager.ConnectionStrings["WMS"].ConnectionString;
+                return System.Configuration.ConfigurationManager.ConnectionStrings["xapp"].ConnectionString;
             }
         }
 
         public static DbConnection GetConnection()
         {
-            var con = new Oracle.DataAccess.Client.OracleConnection(ConnectionString);
+            var con = new MySqlConnection(ConnectionString);
 
             return con;
         }

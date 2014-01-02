@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using Oracle.DataAccess.Client;
 using WMS.Web.Models;
 using System.IO;
 using WMS.Web.Services;
